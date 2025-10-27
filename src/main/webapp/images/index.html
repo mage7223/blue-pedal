@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#findDevices').click(async function() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['battery_service', 'device_information']
+                });
+                
+                const server = await device.gatt.connect();
+                console.log('Connected to GATT server');
+                
+                // Handle disconnection
+                device.addEventListener('gattserverdisconnected', () => {
+                    console.log('Device disconnected');
+                });
+                
+                // Add serial data handling if device supports it
+                if (device.gatt.connected) {
+                    // Listen for characteristic value changes
+                    const handleCharacteristicValueChanged = (event) => {
+                        const value = event.target.value;
+                        const textDecoder = new TextDecoder();
+                        const serialData = textDecoder.decode(value);
+                        console.log('Serial data received:', serialData);
+                    };
+                    
+                    // You would need to get the appropriate service and characteristic
+                    // This is a generic example - replace with your device's specific UUIDs
+                    try {
+                        const service = await server.getPrimaryService('your-service-uuid');
+                        const characteristic = await service.getCharacteristic('your-characteristic-uuid');
+                        await characteristic.startNotifications();
+                        characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+                    } catch (serviceError) {
+                        console.log('Service not available:', serviceError);
+                    }
+                }
+                console.log('Found device:', device.name);
+            } catch (error) {
+            console.error('Error finding Bluetooth devices:', error);
+            }
+        });
+    });
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    
+    <button id="findDevices">Find Bluetooth Devices</button>
+
+</body>
+</html>
