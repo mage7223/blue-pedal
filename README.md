@@ -9,7 +9,7 @@ https://learn.adafruit.com/three-button-foot-switch/
 https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html
 https://www.adafruit.com/product/3406
 
-
+https://youtu.be/SsnqrpUQLbk?si=SMgRHoyNdtn1Hoo1
 
 
 https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/
