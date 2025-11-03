@@ -1,22 +1,27 @@
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
+#include <BLE2902.h>
+#include <BLE2901.h>
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID              "55072829-bc9e-4c53-938a-74a6d4c78776"
-#define CHARACTERISTIC_UUID_READ  "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-#define CHARACTERISTIC_UUID_WRITE "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define SERVICE_UUID              "d98e357f-3d21-4669-a17d-9b389d6559e1"
+#define CHARACTERISTIC_UUID_BTN_UP  "019f2af2-6401-445b-a52d-8119aca2c5ef"
+#define CHARACTERISTIC_UUID_BTN_DOWN "4e9ca473-b618-4de5-a0db-bb1c055a5e1c"
 
 // Button pins (fixed syntax - removed semicolons)
-#define SWITCH_PIN_0 3
-#define SWITCH_PIN_1 10
-#define SWITCH_PIN_2 9
+#define SWITCH_PIN_0 8
+#define SWITCH_PIN_1 9
+#define SWITCH_PIN_2 10
 
-int buttonStatus0 = LOW;
-int buttonStatus1 = LOW;
-int buttonStatus2 = LOW;
+#define BUTTON_UP HIGH
+#define BUTTON_DOWN LOW
+
+int buttonStatus0 = HIGH;
+int buttonStatus1 = HIGH;
+int buttonStatus2 = HIGH;
 
 // Debouncing variables
 unsigned long lastDebounceTime0 = 0;
@@ -24,7 +29,10 @@ unsigned long lastDebounceTime1 = 0;
 unsigned long lastDebounceTime2 = 0;
 unsigned long debounceDelay = 50;    // 50ms debounce delay
 
-BLECharacteristic *pCharacteristic;
+BLECharacteristic *pCharacteristicDown;
+BLECharacteristic *pCharacteristicUp;
+BLE2901 *descriptor_2901 = NULL;
+
 bool deviceConnected = false;
 
 // Server callbacks to track connection status
@@ -42,25 +50,10 @@ class MyServerCallbacks: public BLEServerCallbacks {
     }
 };
 
-// Characteristic callbacks for incoming data
-class MyCallbacks: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
-      String value = pCharacteristic->getValue();
-
-      if (value.length() > 0) {
-        Serial.println("*********");
-        Serial.print("New value: ");
-        for (int i = 0; i < value.length(); i++)
-          Serial.print(value[i]);
-
-        Serial.println();
-        Serial.println("*********");
-      }
-    }
-};
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("BLE Server initialization...");
   
   // Initialize button pins as inputs with pull-up resistors
   pinMode(SWITCH_PIN_0, INPUT_PULLUP);
@@ -76,20 +69,46 @@ void setup() {
   BLEDevice::init("Sophie's Pedals");
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
+  Serial.println("BLE initialized, creating Characteristics");
 
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
   // Create characteristic with notify capability for sending button updates
-  pCharacteristic = pService->createCharacteristic(
-                                         CHARACTERISTIC_UUID_WRITE,
-                                         BLECharacteristic::PROPERTY_READ |
-                                         BLECharacteristic::PROPERTY_WRITE |
-                                         BLECharacteristic::PROPERTY_NOTIFY
+  pCharacteristicDown = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID_BTN_DOWN,
+                                          BLECharacteristic::PROPERTY_READ | 
+                                          BLECharacteristic::PROPERTY_WRITE | 
+                                          BLECharacteristic::PROPERTY_NOTIFY | 
+                                          BLECharacteristic::PROPERTY_INDICATE
+                                       );
+  Serial.println("Characteristic buttonDown created");
+  // Create characteristic with notify capability for sending button updates
+  pCharacteristicUp = pService->createCharacteristic(
+                                         CHARACTERISTIC_UUID_BTN_UP,
+                                          BLECharacteristic::PROPERTY_READ | 
+                                          BLECharacteristic::PROPERTY_WRITE | 
+                                          BLECharacteristic::PROPERTY_NOTIFY | 
+                                          BLECharacteristic::PROPERTY_INDICATE
                                        );
 
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristic->setValue("Button Monitor Ready");
-  
+  Serial.println("Characteristic buttonUp created");
+
+  pCharacteristicDown->addDescriptor(new BLE2902());
+  // Adds also the Characteristic User Description - 0x2901 descriptor
+  descriptor_2901 = new BLE2901();
+  descriptor_2901->setDescription("Button Down Events");
+  descriptor_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
+  pCharacteristicDown->addDescriptor(descriptor_2901);
+
+  pCharacteristicUp->addDescriptor(new BLE2902());
+  // Adds also the Characteristic User Description - 0x2901 descriptor
+  descriptor_2901 = new BLE2901();
+  descriptor_2901->setDescription("Button Up Events");
+  descriptor_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
+  pCharacteristicUp->addDescriptor(descriptor_2901);
+
+  Serial.println("Starting Service");
+
   pService->start();
 
   // Start advertising
@@ -98,10 +117,12 @@ void setup() {
   pAdvertising->setScanResponse(true);
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
-  pAdvertising->start();
+  BLEDevice::startAdvertising();
+
+//  pAdvertising->start();
   
   Serial.println("BLE Server started and advertising...");
-  Serial.println("Monitoring buttons on pins 3, 9, and 10");
+  Serial.printf("Monitoring buttons on pins %i, %i, and %i", SWITCH_PIN_0, SWITCH_PIN_1, SWITCH_PIN_2);
 }
 
 void notifyButtonChanged(int buttonIndex, int buttonCurrentStatus) {
@@ -118,7 +139,7 @@ void notifyButtonChanged(int buttonIndex, int buttonCurrentStatus) {
   String statusMessage = "Button " + String(buttonIndex) + " (Pin " + String(pinNumber) + ") ";
   String bleMessage = "BTN" + String(buttonIndex) + ":";
   
-  if (buttonCurrentStatus == LOW) {
+  if (buttonCurrentStatus == BUTTON_DOWN) {
     statusMessage += "PRESSED";
     bleMessage += "1";  // Button pressed (LOW due to pull-up)
   } else {
@@ -131,8 +152,14 @@ void notifyButtonChanged(int buttonIndex, int buttonCurrentStatus) {
   
   // Send notification via BLE only if client is connected
   if (deviceConnected) {
-    pCharacteristic->setValue(bleMessage.c_str());
-    pCharacteristic->notify();
+    if(buttonCurrentStatus == BUTTON_DOWN){
+      pCharacteristicDown->setValue((uint8_t *)&buttonIndex, 4);
+      pCharacteristicDown->notify();
+    }
+    if(buttonCurrentStatus == BUTTON_UP){
+      pCharacteristicUp->setValue((uint8_t *)&buttonIndex, 4);
+      pCharacteristicUp->notify();
+    }
   }
 }
 
