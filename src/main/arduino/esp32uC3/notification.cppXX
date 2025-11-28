@@ -78,6 +78,8 @@ void setup() {
   descriptor_2901->setDescription("My own description for this characteristic.");
   descriptor_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
   pCharacteristic->addDescriptor(descriptor_2901);
+
+  pService->addCharacteristic(pCharacteristic);
  
   // Start the service
   pService->start();

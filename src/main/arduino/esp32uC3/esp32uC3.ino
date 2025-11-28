@@ -107,6 +107,8 @@ void setup() {
   descriptor_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
   pCharacteristicUp->addDescriptor(descriptor_2901);
 
+  pService->addCharacteristic(pCharacteristicDown);
+  pService->addCharacteristic(pCharacteristicUp);
   Serial.println("Starting Service");
 
   pService->start();
@@ -114,7 +116,9 @@ void setup() {
   // Start advertising
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->setScanResponse(true);
+  // Add characteristics to advertising
+  pAdvertising->setScanResponse(false);
+  // Set preferred connection parameters for better compatibility with iOS devices
   pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
