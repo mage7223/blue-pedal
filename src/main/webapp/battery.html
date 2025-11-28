@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Battery Status</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('#connect').click(connectDevice);
+            });
+
+            const SERVICE_GUID = 'd98e357f-3d21-4669-a17d-9b389d6559e1'; // Battery Service UUID
+            const CHARACTERISTIC_GUID = '4e9ca473-b618-4de5-a0db-bb1c055a5e1c'; // Battery Level Characteristic UUID
+
+            function connectDevice(){
+            navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE_GUID] }] })
+                .then(device => {
+                    console.log('Device found:', device);
+                    return device.gatt.connect();
+                })
+                .then(server => {
+                    console.log('Connected to GATT server:', server);
+                    return server.getPrimaryService(SERVICE_GUID);
+                })
+                .then(service => {
+                    console.log('Battery service found:', service);
+                    return service.getCharacteristic(CHARACTERISTIC_GUID);
+                })
+                .then(characteristic => {
+                    console.log('Battery level characteristic found:', characteristic);
+                    return characteristic.readValue();
+                })
+                .then(value => {
+                    const level = value.getUint8(0);
+                    $('#level').text(`${level}%`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    $('#level').text('Error retrieving battery level');
+                });
+
+            }
+
+        </script>
+    </head>
+    <body>
+        <button id="connect">Connect to Battery Device</button>        
+        <h1>Battery Status</h1>
+        <p>Battery Level: <span id="level">Loading...</span></p>
+        <p>Charging: <span id="charging">Loading...</span></p>
+        <p>Charging Time: <span id="chargingTime">Loading...</span></p>
+        <p>Discharging Time: <span id="dischargingTime">Loading...</span></p>
+    </body>
+</html>

@@ -5,46 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
+        const serviceUUID = "d98e357f-3d21-4669-a17d-9b389d6559e1";
+        const buttonDownCharacteristicUUID = "4e9ca473-b618-4de5-a0db-bb1c055a5e1c";
+        const buttonUpCharacteristicUUID = "019f2af2-6401-445b-a52d-8119aca2c5ef";
+        function handleCharacteristicValueChanged(event) {
+            const value = event.target.value;
+            const textDecoder = new TextDecoder();
+            const serialData = textDecoder.decode(value);
+            console.log('Serial data received:', serialData);
+        };
+
+// TODO: Server is disconnecting after a while. Need to investigate further.
     $(document).ready(function() {
         $('#findDevices').click(async function() {
             try {
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['battery_service', 'device_information']
-                });
+                const device = await navigator.bluetooth.requestDevice(
+                    { filters:[ {services:[serviceUUID]} ] }
+                );
                 
-                const server = await device.gatt.connect();
-                console.log('Connected to GATT server');
-                
-                // Handle disconnection
+                var server;
+                var service;
+                var buttonDownCharacteristic;
+                var buttonUpCharacteristic;
                 device.addEventListener('gattserverdisconnected', () => {
                     console.log('Device disconnected');
                 });
-                
-                // Add serial data handling if device supports it
-                if (device.gatt.connected) {
-                    // Listen for characteristic value changes
-                    const handleCharacteristicValueChanged = (event) => {
-                        const value = event.target.value;
-                        const textDecoder = new TextDecoder();
-                        const serialData = textDecoder.decode(value);
-                        console.log('Serial data received:', serialData);
-                    };
-                    
-                    // You would need to get the appropriate service and characteristic
-                    // This is a generic example - replace with your device's specific UUIDs
-                    try {
-                        const service = await server.getPrimaryService('your-service-uuid');
-                        const characteristic = await service.getCharacteristic('your-characteristic-uuid');
-                        await characteristic.startNotifications();
-                        characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-                    } catch (serviceError) {
-                        console.log('Service not available:', serviceError);
-                    }
-                }
-                console.log('Found device:', device.name);
+                device.addEventListener('gattserverconnected', () => {
+                    console.log('Device connected');
+                });
+                device.gatt.connect()
+                .then(connectedServer => {
+                    console.log('Connected to GATT server');
+                    server = connectedServer;
+                    return connectedServer.getPrimaryService(serviceUUID);
+                })
+                .then(connectedService => {
+                    return Promise.all([
+                        connectedService.getCharacteristic(buttonDownCharacteristicUUID),
+                        connectedService.getCharacteristic(buttonUpCharacteristicUUID)
+                    ]);
+                }).then(characteristics => {
+                    [buttonDownCharacteristic, buttonUpCharacteristic] = characteristics;
+                    console.log('Characteristics obtained:', buttonDownCharacteristic, buttonUpCharacteristic);
+                })
+                .catch(error => {
+                    console.error('Error during GATT operations:', error);
+                });
+
             } catch (error) {
-            console.error('Error finding Bluetooth devices:', error);
+                console.error('Error finding Bluetooth devices:', error);
             }
         });
     });
