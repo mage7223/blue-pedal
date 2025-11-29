@@ -7,7 +7,7 @@ The general reason for this project is to create a foot operated mechanissm that
 The orinigal motivitaion for this design was to count crochet stitches for a row, and reset once the row was complete. An example web application has been included to serve that purpose.
 
 # Materials
-ESP32C3 <sub> [Amazon](https://a.co/d/cGFcENa) </sub>
+Xiao ESP32C3 <sub> [Amazon](https://a.co/d/3PdEz2W) </sub>
 
 A multifunctional processor with BLE (Bluetooth Low Energy) and Wifi built in to the chip. The BLE is used to transmit to a compatible web browser which has a page loaded to interpret the signals sent from the device.
 
@@ -21,7 +21,7 @@ Access to a 3d printer and appropriate printers materials is required. You can s
 
 [Micro Switch x3](https://www.adafruit.com/product/817)
 
-<img src="images\micro-switch.png">
+<img src="images/micro-switch.png">
 
 [Wires with connectors for the switches](https://www.adafruit.com/product/3835)
 
@@ -31,6 +31,14 @@ Access to a 3d printer and appropriate printers materials is required. You can s
 [M3 Screws and nuts](https://a.co/d/eXKQyFs)
 
 <img src="images/m3-screws.png" width="200px">
+
+[Optional Battery](https://a.co/d/fkS74rt)
+
+<img src="images/esp32c3/battery.png" height="200px">
+
+Connection the battery requires soldering the cut wires to the bottom of the ESP32C3 board. Putting a power switch on this circuit is recommended.
+
+<img src="images/esp32c3/esp32c3-battery.png">
 
 # Printing
 
@@ -46,11 +54,15 @@ Print the parts and prepare to assemble them. Instructions can be found on [AdaF
 
 You will need to configure your [Arduino IDE](https://www.arduino.cc/en/software/) with the Xiao ESP32C3 using the [Xiao ESP32C3 getting started tutorial](https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/)
 
-The [source code](src\main\arduino\blue-pedal\blue-pedal.ino) can be found in the repository. This needs to be loaded into the Arduino IDE, compiled, and uploaded to the Xiao board.
+The [source code](src/main/arduino/blue-pedal/blue-pedal.ino) can be found in the repository. This needs to be loaded into the Arduino IDE, compiled, and uploaded to the Xiao board.
 
 # Website
 
-The [Web Page](src\main\webapp\index.html) that can control the Pedal Board can be found in the repository
+The [Web Page](src/main/webapp/index.html) that can control the Pedal Board can be found in the repository
+
+The Bluetooth API does not work in all browsers, Apple Safari & Firefox are browsers yet without this functionality.
+
+Here is the [Bluetooth API Compatibility Chart](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility)
 
 # Links
 https://www.thingiverse.com/thing:5237349
