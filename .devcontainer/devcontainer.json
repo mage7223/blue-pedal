@@ -1,0 +1,59 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Arduino ESP32 DevContainer",
+	"build": {
+		"dockerfile": "../Dockerfile",
+		"context": "..",
+		"args": {
+			"--dns":"8.8.8.8"
+		}
+	},
+	
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "arduino-cli core update-index && arduino-cli lib update-index",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.vscode-arduino",
+				"platformio.platformio-ide",
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"TheLastOutpostWorkshop.arduino-maker-workshop",
+				"ritwickdey.LiveServer"
+			],
+			"settings": {
+				"arduino.path": "/usr/local/bin",
+				"arduino.commandPath": "arduino-cli",
+				"arduino.useArduinoCli": true,
+				"arduino.logLevel": "info"
+			    //,"terminal.integrated.shell.linux": "/bin/bash" // Or "/bin/bash", "/usr/bin/pwsh", etc.
+			}
+		}
+	},
+	
+	// Enable privileged mode for device access and mount /dev
+	"runArgs": [
+		"--privileged",
+		"--device=/dev/ttyUSB0:/dev/ttyUSB0",
+		"--device=/dev/ttyACM0,/dev/ttyACM0"
+	],
+	"mounts": [
+		"source=/dev,target=/dev,type=bind,consistency=cached"
+	],
+
+	// Set the default user
+	"remoteUser": "arduino",
+	
+	// Environment variables
+	"containerEnv": {
+		"ARDUINO_DIRECTORIES_USER": "/home/arduino/.arduino15",
+		"ARDUINO_DIRECTORIES_DATA": "/home/arduino/.arduino15"
+	}
+}
+

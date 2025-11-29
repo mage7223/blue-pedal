@@ -1,0 +1,10 @@
+{
+    "liveServer.settings.port": 5000,
+    "liveServer.settings.root": "/",
+    "liveServer.settings.CustomBrowser": "chrome",
+    "liveServer.settings.https": {
+        "enable": false, // Set to true to enable HTTPS
+        "cert": "", // Full path to your certificate file
+        "key": "", // Full path to your private key file
+        // "passphrase": "your_optional_passphrase" // Optional: if your key has a passphrase
+    }}
