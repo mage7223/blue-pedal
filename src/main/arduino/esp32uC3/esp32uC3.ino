@@ -3,6 +3,8 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 #include <BLE2901.h>
+#include <Arduino.h>
+
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -32,6 +34,20 @@ unsigned long debounceDelay = 50;    // 50ms debounce delay
 BLECharacteristic *pCharacteristicDown;
 BLECharacteristic *pCharacteristicUp;
 bool deviceConnected = false;
+
+const uint32_t NVM_Offset = 0x290000;
+uint8_t FLASH_Address = 0;
+ 
+template<typename T>
+void FlashWrite(uint32_t address, const T& value) {
+  ESP.flashEraseSector((NVM_Offset+address)/4096);
+  ESP.flashWrite(NVM_Offset+address, (uint32_t*)&value, sizeof(value));
+}
+ 
+template<typename T>
+void FlashRead(uint32_t address, T& value) {
+  ESP.flashRead(NVM_Offset+address, (uint32_t*)&value, sizeof(value));
+}
 
 // Server callbacks to track connection status
 class MyServerCallbacks: public BLEServerCallbacks {
