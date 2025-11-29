@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const serviceUUID = "d98e357f-3d21-4669-a17d-9b389d6559e1";
+        const buttonDownCharacteristicUUID = "4e9ca473-b618-4de5-a0db-bb1c055a5e1c";
+        const buttonUpCharacteristicUUID = "019f2af2-6401-445b-a52d-8119aca2c5ef";
+        let clickCount = 0;
+        function leftButtonClicked() {
+            console.log('Left button clicked');
+            if(clickCount > 0){
+                clickCount -= 1;
+            }
+            document.getElementById('count').innerText = clickCount;
+        };
+        function centerButtonClicked() {
+            console.log('Center button clicked');
+            clickCount +=1;
+            document.getElementById('count').innerText = clickCount;
+        };
+        function rightButtonClicked() {
+            clickCount = 0;
+            document.getElementById('count').innerText = clickCount;
+            console.log('Right button clicked');
+        };
+        function handleCharacteristicValueDownChanged(event) {
+            const value = event.target.value;
+            const buttonIndex = value.getUint8(0);
+            if(buttonIndex === 0) {
+                leftButtonClicked();
+            } else if(buttonIndex === 1) {
+                centerButtonClicked();
+            } else if(buttonIndex === 2) {
+                rightButtonClicked();
+            }
+        };
+        function handleCharacteristicValueUpChanged(event) {
+            const value = event.target.value;
+            const buttonIndex = value.getUint8(0);
+
+            console.log('Button up event received for button index:', buttonIndex);
+        };
+
+        let connected = false;
+        let device = null;
+    $(document).ready(function() {
+        $('#findDevices').click(async function() {
+            if(connected) {
+                console.log('Disconnecting Bluetooth devices...');
+                device.gatt.disconnect();
+                document.getElementById('findDevices').src = "images/disconnected.png";
+                connected = false;
+            } else 
+            try {
+                device = await navigator.bluetooth.requestDevice(
+                    { filters:[ {services:[serviceUUID]} ] }
+                );
+                
+                var server;
+                var service;
+                var buttonDownCharacteristic;
+                var buttonUpCharacteristic;
+                device.addEventListener('gattserverdisconnected', () => {
+                    console.log('Device disconnected');
+                    document.getElementById('findDevices').src = "images/disconnected.png";
+                });
+                device.addEventListener('gattserverconnected', () => {
+                    console.log('Device connected');
+                    document.getElementById('findDevices').src = "images/connected.png";
+                });
+                device.gatt.connect()
+                .then(connectedServer => {
+                    console.log('Connected to GATT server');
+                    document.getElementById('findDevices').src = "images/connected.png";
+                    server = connectedServer;
+                    return connectedServer.getPrimaryService(serviceUUID);
+                })
+                .then(connectedService => {
+                    return Promise.all([
+                        connectedService.getCharacteristic(buttonDownCharacteristicUUID),
+                        connectedService.getCharacteristic(buttonUpCharacteristicUUID)
+                    ]);
+                }).then(characteristics => {
+                    [buttonDownCharacteristic, buttonUpCharacteristic] = characteristics;
+                    console.log('Characteristics obtained:', buttonDownCharacteristic, buttonUpCharacteristic);
+                    buttonDownCharacteristic.startNotifications().then(() => {
+                        buttonDownCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueDownChanged);
+                        console.log('Notifications started for button down characteristic');
+                    });
+                    buttonUpCharacteristic.startNotifications().then(() => {
+                        buttonUpCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueUpChanged);
+                        console.log('Notifications started for button up characteristic');
+                    });
+                    connected = true;
+                    
+                })
+                .catch(error => {
+                    console.error('Error during GATT operations:', error);
+                });
+
+            } catch (error) {
+                console.error('Error finding Bluetooth devices:', error);
+            }
+        });
+    });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .h2-container {
+            width: 100%;
+            align-content: center;
+            display: flex;
+            flex-wrap: unset;
+            align-items: center;
+        }
+        .h2-title-container {
+            text-align: center;
+            font-size: 48px;
+        }
+        .find-image {
+            margin-left: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            height: 24px;
+        }
+        .count-display {
+            font-size: 196px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+    <title>Stitch Counter</title>
+</head>
+<body>
+    <h2 class="h2-title-container">Stitch Counter<img id="findDevices" class="find-image" src="images/disconnected.png" alt="Connect to Sophie's Pedal"></h2>
+    <div id="count" class="count-display">0</div>
+
+</body>
+</html>
