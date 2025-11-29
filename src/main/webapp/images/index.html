@@ -14,6 +14,18 @@
             const serialData = textDecoder.decode(value);
             console.log('Serial data received:', serialData);
         };
+        function handleCharacteristicValueDownChanged(event) {
+            const value = event.target.value;
+            const textDecoder = new TextDecoder();
+            const serialData = textDecoder.decode(value);
+            console.log('Serial data received:', serialData);
+        };
+        function handleCharacteristicValueUpChanged(event) {
+            const value = event.target.value;
+            const textDecoder = new TextDecoder();
+            const serialData = textDecoder.decode(value);
+            console.log('Serial data received:', serialData);
+        };
 
 // TODO: Server is disconnecting after a while. Need to investigate further.
     $(document).ready(function() {
@@ -47,6 +59,15 @@
                 }).then(characteristics => {
                     [buttonDownCharacteristic, buttonUpCharacteristic] = characteristics;
                     console.log('Characteristics obtained:', buttonDownCharacteristic, buttonUpCharacteristic);
+                    buttonDownCharacteristic.startNotifications().then(() => {
+                        buttonDownCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueDownChanged);
+                        console.log('Notifications started for button down characteristic');
+                    });
+                    buttonUpCharacteristic.startNotifications().then(() => {
+                        buttonUpCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueUpChanged);
+                        console.log('Notifications started for button up characteristic');
+                    });
+                    
                 })
                 .catch(error => {
                     console.error('Error during GATT operations:', error);

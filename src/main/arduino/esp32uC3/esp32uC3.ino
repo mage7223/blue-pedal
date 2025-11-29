@@ -90,9 +90,9 @@ void setup() {
   // Create characteristic with notify capability for sending button updates
   pCharacteristicDown = pService->createCharacteristic(
                                          CHARACTERISTIC_UUID_BTN_DOWN,
-                                          BLECharacteristic::PROPERTY_READ 
+//                                          BLECharacteristic::PROPERTY_READ 
   //                                        | BLECharacteristic::PROPERTY_WRITE 
-  //                                        | BLECharacteristic::PROPERTY_NOTIFY
+                                           BLECharacteristic::PROPERTY_NOTIFY
   //                                        | BLECharacteristic::PROPERTY_INDICATE
   
                                        );
@@ -108,23 +108,23 @@ void setup() {
 
   Serial.println("Characteristic buttonUp created");
 
-  pCharacteristicDown->addDescriptor(new BLE2902());
+//  pCharacteristicDown->addDescriptor(new BLE2902());
   // Adds also the Characteristic User Description - 0x2901 descriptor
-  BLE2901 *descriptorDown_2901; 
-  descriptorDown_2901 = new BLE2901();
-  descriptorDown_2901->setDescription("Button Down Events");
-  descriptorDown_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
-  pCharacteristicDown->addDescriptor(descriptorDown_2901);
-  Serial.println("Characteristic buttonDown descriptord created");
+//  BLE2901 *descriptorDown_2901; 
+//  descriptorDown_2901 = new BLE2901();
+//  descriptorDown_2901->setDescription("Button Down Events");
+//  descriptorDown_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
+//  pCharacteristicDown->addDescriptor(descriptorDown_2901);
+//  Serial.println("Characteristic buttonDown descriptord created");
 
-  pCharacteristicUp->addDescriptor(new BLE2902());
-  BLE2901 *descriptorUp_2901; 
+//  pCharacteristicUp->addDescriptor(new BLE2902());
+//  BLE2901 *descriptorUp_2901; 
   // Adds also the Characteristic User Description - 0x2901 descriptor
-  descriptorUp_2901 = new BLE2901();
-  descriptorUp_2901->setDescription("Button Up Events");
-  descriptorUp_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
-  pCharacteristicUp->addDescriptor(descriptorUp_2901);
-  Serial.println("Characteristic buttonUp descriptord created");
+//  descriptorUp_2901 = new BLE2901();
+//  descriptorUp_2901->setDescription("Button Up Events");
+//  descriptorUp_2901->setAccessPermissions(ESP_GATT_PERM_READ);  // enforce read only - default is Read|Write
+//  pCharacteristicUp->addDescriptor(descriptorUp_2901);
+//  Serial.println("Characteristic buttonUp descriptord created");
 
 
   Serial.println("Starting Service");
@@ -134,8 +134,9 @@ void setup() {
   // Start advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->setScanResponse(false);
-  pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
   
   Serial.println("BLE Server started and advertising...");

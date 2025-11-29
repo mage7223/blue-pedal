@@ -3,7 +3,7 @@
     "liveServer.settings.root": "/",
     "liveServer.settings.CustomBrowser": "chrome",
     "liveServer.settings.https": {
-        "enable": true, // Set to true to enable HTTPS
+        "enable": false, // Set to true to enable HTTPS
         "cert": "/workspaces/blue-pedal/.vscode/localhost.crt", // Full path to your certificate file
         "key": "/workspaces/blue-pedal/.vscode/localhost.key", // Full path to your private key file
         // "passphrase": "your_optional_passphrase" // Optional: if your key has a passphrase
