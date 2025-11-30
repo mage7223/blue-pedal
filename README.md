@@ -1,10 +1,10 @@
 # Blue Pedal
-Files, Process, and Code to have a bluetooth enabled pedal to count stitches or whatever may need countig with a foot.
+Files, Process, and Code to have a bluetooth enabled pedal to count stitches or whatever may need counting with a foot.
 
 # Overview
-The general reason for this project is to create a foot operated mechanissm that will allow someone to count to a set number while correcting as nessecary and then resetting back to zero and repeating. This allows for accurate counting to a number and then resetting while allowing for corrections.
+The general reason for this project is to create a foot operated mechanism that will allow someone to count to a set number while correcting as necessary and then resetting back to zero and repeating. This allows for accurate counting to a number and then resetting while allowing for corrections.
 
-The orinigal motivitaion for this design was to count crochet stitches for a row, and reset once the row was complete. An example web application has been included to serve that purpose.
+The original motivation for this design was to count crochet stitches for a row, and reset once the row was complete. An example web application has been included to serve that purpose.
 
 # Materials
 Xiao ESP32C3 <sub> [Amazon](https://a.co/d/3PdEz2W) </sub>
@@ -17,7 +17,7 @@ A multifunctional processor with BLE (Bluetooth Low Energy) and Wifi built in to
 
 Originally created by Lady Ada from Adafruit, 
 
-Access to a 3d printer and appropriate printers materials is required. You can send this off to a service for printing as well. My prints took about 12 hours.
+Access to a 3d printer and appropriate printer materials is required. You can send this off to a service for printing as well. My prints took about 12 hours.
 
 [Micro Switch x3](https://www.adafruit.com/product/817)
 
@@ -36,7 +36,7 @@ Access to a 3d printer and appropriate printers materials is required. You can s
 
 <img src="images/esp32c3/battery.png" height="200px">
 
-Connection the battery requires soldering the cut wires to the bottom of the ESP32C3 board. Putting a power switch on this circuit is recommended.
+Connecting the battery requires soldering the cut wires to the bottom of the ESP32C3 board. Putting a power switch on this circuit is recommended.
 
 <img src="images/esp32c3/esp32c3-battery.png">
 
@@ -64,17 +64,23 @@ The Bluetooth API does not work in all browsers, Apple Safari & Firefox are brow
 
 Here is the [Bluetooth API Compatibility Chart](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility)
 
+# Video of Operation
+
+Here is a quick video with a battery operated device
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/SrT2ba66-fE/0.jpg)](https://www.youtube.com/shorts/SrT2ba66-fE)
+
+
 # Links
-https://www.thingiverse.com/thing:5237349
-https://learn.adafruit.com/three-button-foot-switch/
+* https://www.thingiverse.com/thing:5237349
+* https://learn.adafruit.com/three-button-foot-switch/
 
-https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html
-https://www.adafruit.com/product/3406
+* https://www.seeedstudio.com/Seeed-XIAO-ESP32C3-p-5431.html
+* https://www.adafruit.com/product/3406
 
-https://youtu.be/SsnqrpUQLbk?si=SMgRHoyNdtn1Hoo1
+* https://youtu.be/SsnqrpUQLbk?si=SMgRHoyNdtn1Hoo1
 
 
-https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/
-https://randomnerdtutorials.com/esp32-webserial-library/
-https://forum.arduino.cc/t/can-i-send-serial-monitor-data-over-bluetooth-with-esp32/886250
-https://randomnerdtutorials.com/esp32-web-bluetooth/
+* https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/
+* https://randomnerdtutorials.com/esp32-webserial-library/
+* https://forum.arduino.cc/t/can-i-send-serial-monitor-data-over-bluetooth-with-esp32/886250
+* https://randomnerdtutorials.com/esp32-web-bluetooth/
