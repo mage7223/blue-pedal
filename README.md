@@ -60,6 +60,8 @@ The [source code](src/main/arduino/blue-pedal/blue-pedal.ino) can be found in th
 
 The [Web Page](src/main/webapp/index.html) that can control the Pedal Board can be found in the repository
 
+A live website can be located here: [Pedal.Questionable.Codes](https://zod.vg/yBWa)
+
 The Bluetooth API does not work in all browsers, Apple Safari & Firefox are browsers yet without this functionality.
 
 Here is the [Bluetooth API Compatibility Chart](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility)
