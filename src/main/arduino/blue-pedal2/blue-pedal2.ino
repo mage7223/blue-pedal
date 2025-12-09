@@ -3,18 +3,21 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 #include <BLE2901.h>
+#include <Preferences.h>
+
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID              "d98e357f-3d21-4669-a17d-9b389d6559e1"
-#define CHARACTERISTIC_UUID_BTN_UP  "019f2af2-6401-445b-a52d-8119aca2c5ef"
-#define CHARACTERISTIC_UUID_BTN_DOWN "4e9ca473-b618-4de5-a0db-bb1c055a5e1c"
+#define SERVICE_UUID                  "d98e357f-3d21-4669-a17d-9b389d6559e1"
+#define CHARACTERISTIC_UUID_BTN_UP    "019f2af2-6401-445b-a52d-8119aca2c5ef"
+#define CHARACTERISTIC_UUID_BTN_DOWN  "4e9ca473-b618-4de5-a0db-bb1c055a5e1c"
+#define DEVICE_NAME                   "Kevin's Pedals"
 
 // Button pins (fixed syntax - removed semicolons)
-#define SWITCH_PIN_0 8
-#define SWITCH_PIN_1 9
-#define SWITCH_PIN_2 10
+#define SWITCH_PIN_0 4
+#define SWITCH_PIN_1 6
+#define SWITCH_PIN_2 7
 
 #define BUTTON_UP HIGH
 #define BUTTON_DOWN LOW
@@ -79,7 +82,7 @@ void setup() {
   buttonStatus2 = digitalRead(SWITCH_PIN_2);
 
   // Initialize BLE with device name
-  BLEDevice::init("Sophie's Pedals");
+  BLEDevice::init(DEVICE_NAME);
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new BluePedalCallbacks());
   Serial.println("BLE initialized, creating Characteristics");
