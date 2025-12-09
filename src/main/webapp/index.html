@@ -8,6 +8,7 @@
         const serviceUUID = "d98e357f-3d21-4669-a17d-9b389d6559e1";
         const buttonDownCharacteristicUUID = "4e9ca473-b618-4de5-a0db-bb1c055a5e1c";
         const buttonUpCharacteristicUUID = "019f2af2-6401-445b-a52d-8119aca2c5ef";
+        const deviceNameCharacteristicUUID = "019b018d-9736-7719-bf76-b09e14816156";
         let clickCount = 0;
         function leftButtonClicked() {
             console.log('Left button clicked');
@@ -81,11 +82,12 @@
                 .then(connectedService => {
                     return Promise.all([
                         connectedService.getCharacteristic(buttonDownCharacteristicUUID),
-                        connectedService.getCharacteristic(buttonUpCharacteristicUUID)
+                        connectedService.getCharacteristic(buttonUpCharacteristicUUID),
+                        connectedService.getCharacteristic(deviceNameCharacteristicUUID)
                     ]);
                 }).then(characteristics => {
-                    [buttonDownCharacteristic, buttonUpCharacteristic] = characteristics;
-                    console.log('Characteristics obtained:', buttonDownCharacteristic, buttonUpCharacteristic);
+                    [buttonDownCharacteristic, buttonUpCharacteristic, deviceNameCharacteristic] = characteristics;
+                    console.log('Characteristics obtained:', buttonDownCharacteristic, buttonUpCharacteristic, deviceNameCharacteristic);
                     buttonDownCharacteristic.startNotifications().then(() => {
                         buttonDownCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueDownChanged);
                         console.log('Notifications started for button down characteristic');
@@ -93,6 +95,15 @@
                     buttonUpCharacteristic.startNotifications().then(() => {
                         buttonUpCharacteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueUpChanged);
                         console.log('Notifications started for button up characteristic');
+                    });
+                    console.log('Reading device name characteristic...' + deviceNameCharacteristic.uuid);
+                    deviceNameCharacteristic.readValue().then(value => {
+                        const decoder = new TextDecoder('utf-8');
+                        const deviceName = decoder.decode(value);
+                        console.log('Connected to device:', deviceName);
+                    })
+                    .catch(error => {
+                        console.error('Error reading device name characteristic:', error);
                     });
                     connected = true;
                     
