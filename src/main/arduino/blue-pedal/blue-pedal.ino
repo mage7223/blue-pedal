@@ -12,9 +12,9 @@
 #define CHARACTERISTIC_UUID_BTN_DOWN "4e9ca473-b618-4de5-a0db-bb1c055a5e1c"
 
 // Button pins (fixed syntax - removed semicolons)
-#define SWITCH_PIN_0 8
-#define SWITCH_PIN_1 9
-#define SWITCH_PIN_2 10
+#define SWITCH_PIN_0 8  // Green
+#define SWITCH_PIN_1 9  // Yellow
+#define SWITCH_PIN_2 10 // Orange
 
 #define BUTTON_UP HIGH
 #define BUTTON_DOWN LOW
@@ -66,6 +66,7 @@ class BluePedalCallbacks: public BLEServerCallbacks {
 void setup() {
   // Set up serial communication for debugging
   Serial.begin(115200);
+  delay(1000);
   Serial.println("BLE Server initialization...");
   
   // Initialize button pins as inputs with pull-up resistors
@@ -79,7 +80,10 @@ void setup() {
   buttonStatus2 = digitalRead(SWITCH_PIN_2);
 
   // Initialize BLE with device name
-  BLEDevice::init("Sophie's Pedals");
+  String deviceName = "Maker's Pedals";
+  Serial.print("Device Name: ");
+  Serial.println(deviceName);
+  BLEDevice::init(deviceName);
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new BluePedalCallbacks());
   Serial.println("BLE initialized, creating Characteristics");
@@ -133,6 +137,7 @@ void setup() {
   
   Serial.println("BLE Server started and advertising...");
   Serial.printf("Monitoring buttons on pins %i, %i, and %i", SWITCH_PIN_0, SWITCH_PIN_1, SWITCH_PIN_2);
+  Serial.println();
 }
 
 void notifyButtonChanged(int buttonIndex, int buttonCurrentStatus) {
