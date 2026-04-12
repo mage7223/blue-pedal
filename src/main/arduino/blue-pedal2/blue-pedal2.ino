@@ -16,11 +16,12 @@
 #define DEFAULT_DEVICE_NAME             "Maker's Pedals"
 #define PREFS_NAMESPACE                 "pedals"
 #define PREFS_DEVICE_NAME               "device-name"
+#define DEVICE_NAME_CHANGE_RESTART      false
 
 // Button pins (fixed syntax - removed semicolons)
-#define SWITCH_PIN_0 4
-#define SWITCH_PIN_1 6
-#define SWITCH_PIN_2 7
+#define SWITCH_PIN_0 8
+#define SWITCH_PIN_1 9
+#define SWITCH_PIN_2 10
 
 #define BUTTON_UP HIGH
 #define BUTTON_DOWN LOW
@@ -28,29 +29,19 @@
 Preferences preferences;
 bool deviceConnected = false;
 
-// Server callbacks to track connection status
-class BluePedalCallbacks: public BLEServerCallbacks {
+class BluePedalReadWriteCallbaks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
+        String currentDeviceName = getDeviceName();
         String newDeviceName = pCharacteristic->getValue();
+        Serial.println("Write Request change Device Name from: " + currentDeviceName + " to: " + newDeviceName);
         setDeviceName(newDeviceName);
+        pCharacteristic->notify();
     }
 
     void onRead(BLECharacteristic *pCharacteristic) {
         String currentDeviceName = getDeviceName();
-        pCharacteristic->setValue(currentDeviceName.c_str());
         Serial.println("Read Request for Device Name: " + currentDeviceName);
-    }
-
-    void onConnect(BLEServer* pServer) {
-      deviceConnected = true;
-      Serial.println("BLE Client connected");
-    }
-
-    void onDisconnect(BLEServer* pServer) {
-      deviceConnected = false;
-      Serial.println("BLE Client disconnected");
-      // Restart advertising
-      pServer->getAdvertising()->start();
+        pCharacteristic->setValue(currentDeviceName.c_str());
     }
   public:
     String getDeviceName() {
@@ -64,7 +55,26 @@ class BluePedalCallbacks: public BLEServerCallbacks {
       preferences.begin(PREFS_NAMESPACE, false);
       preferences.putString(PREFS_DEVICE_NAME, deviceName);
       preferences.end();
+      if(DEVICE_NAME_CHANGE_RESTART){
+        ESP.restart();
+      }
       return deviceName;
+    }
+};
+
+// Server callbacks to track connection status
+class BluePedalCallbacks: public BLEServerCallbacks {
+
+    void onConnect(BLEServer* pServer) {
+      deviceConnected = true;
+      Serial.println("BLE Client connected");
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+      deviceConnected = false;
+      Serial.println("BLE Client disconnected");
+      // Restart advertising
+      pServer->getAdvertising()->start();
     }
 };
 
@@ -83,10 +93,7 @@ BLECharacteristic *pCharacteristicDown;
 BLECharacteristic *pCharacteristicUp;
 BLECharacteristic *pCharacteristicDeviceName;
 BluePedalCallbacks *bluePedalCallbacks;
-
-void firstTime(){
-
-}
+BluePedalReadWriteCallbaks *bluePedalReadWriteCallbacks;
 
 void setup() {
   // Set up serial communication for debugging
@@ -100,6 +107,7 @@ void setup() {
   pinMode(SWITCH_PIN_2, INPUT_PULLUP);
 
   bluePedalCallbacks = new BluePedalCallbacks();
+  bluePedalReadWriteCallbacks = new BluePedalReadWriteCallbaks();
   
  
    // Read initial button states
@@ -108,7 +116,7 @@ void setup() {
   buttonStatus2 = digitalRead(SWITCH_PIN_2);
 
   // Initialize BLE with device name
-  BLEDevice::init(bluePedalCallbacks->getDeviceName());
+  BLEDevice::init(bluePedalReadWriteCallbacks->getDeviceName());
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new BluePedalCallbacks());
   Serial.println("BLE initialized, creating Characteristics");
@@ -150,8 +158,12 @@ void setup() {
 
   pCharacteristicDeviceName = pService->createCharacteristic(
                                          CHARACTERISTIC_UUID_DEVICE_NAME,
-                                          BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE
+                                          BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY
                                        );
+  pCharacteristicDeviceName->setCallbacks(bluePedalReadWriteCallbacks);
+  pCharacteristicDeviceName->addDescriptor(new BLE2902());
+
+
   Serial.println("Characteristic deviceName created");
 
   Serial.println("Starting Service");
@@ -170,7 +182,7 @@ void setup() {
   Serial.printf("Monitoring buttons on pins %i, %i, and %i\n", SWITCH_PIN_0, SWITCH_PIN_1, SWITCH_PIN_2);
   preferences.begin(PREFS_NAMESPACE, true);
 
-  Serial.printf("Device Name: %s\n",bluePedalCallbacks->getDeviceName().c_str());
+  Serial.printf("Device Name: %s\n",bluePedalReadWriteCallbacks->getDeviceName().c_str());
 }
 
 void notifyButtonChanged(int buttonIndex, int buttonCurrentStatus) {
