@@ -11,10 +11,21 @@
 #define CHARACTERISTIC_UUID_BTN_UP  "019f2af2-6401-445b-a52d-8119aca2c5ef"
 #define CHARACTERISTIC_UUID_BTN_DOWN "4e9ca473-b618-4de5-a0db-bb1c055a5e1c"
 
+#define SOPHIES_PEDAL
+
+
 // Button pins (fixed syntax - removed semicolons)
 #define SWITCH_PIN_0 8  // Green
 #define SWITCH_PIN_1 9  // Yellow
 #define SWITCH_PIN_2 10 // Orange
+#define PEDAL_NAME "Maker's Pedals"
+
+#ifdef SOPHIES_PEDAL
+#define SWITCH_PIN_0 4  // Green
+#define SWITCH_PIN_1 6  // Yellow
+#define SWITCH_PIN_2 7 // Orange
+#define PEDAL_NAME "Sophie's Pedals"
+#endif
 
 #define BUTTON_UP HIGH
 #define BUTTON_DOWN LOW
@@ -80,7 +91,7 @@ void setup() {
   buttonStatus2 = digitalRead(SWITCH_PIN_2);
 
   // Initialize BLE with device name
-  String deviceName = "Maker's Pedals";
+  String deviceName = PEDAL_NAME;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
   BLEDevice::init(deviceName);

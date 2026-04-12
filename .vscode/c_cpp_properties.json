@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "name": "Arduino-ESP32C3",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:ARDUINO_PATH}/hardware/esp32/3.0.0/cores/esp32", // Adjust version if needed
+                "${env:ARDUINO_PATH}/hardware/esp32/3.0.0/variants/esp32c3", // Adjust version and variant if needed
+                "${env:ARDUINO_PATH}/libraries/**",
+                "${env:ARDUINO_PATH}/tools/sdk/esp32c3/include/**" // Path to ESP-IDF components
+            ],
+            "defines": [
+                "ARDUINO=10819", // Adjust Arduino version if needed
+                "ESP32C3",
+                "ESP_PLATFORM"
+            ],
+            "compilerPath": "${env:ARDUINO_PATH}/tools/xtensa-esp32c3-elf-gcc/esp-2021r2-8.4.0/bin/xtensa-esp32c3-elf-g++", // Adjust path and version
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm64", // Or "clang-x64" depending on your system and setup
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "${env:ARDUINO_PATH}/hardware/esp32/3.0.0/cores/esp32",
+                    "${env:ARDUINO_PATH}/hardware/esp32/3.0.0/variants/esp32c3",
+                    "${env:ARDUINO_PATH}/libraries/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}
